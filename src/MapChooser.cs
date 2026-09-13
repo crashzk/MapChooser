@@ -153,6 +153,10 @@ public sealed class MapChooser : BasePlugin
         _state.NextMap = null;
         _state.RoundsPlayed = 0;
 
+        // Release the guard latched by the previous map's ChangeMap. Without this the flag
+        // stays true for the rest of the process and every later ChangeMap/EOF vote no-ops.
+        _state.MapSwitchInFlight = false;
+
         // MapStartTime is set to 0 here; it will be updated properly in OnWarmupEnd or OnMatchStart
         // when the engine is fully initialized (avoiding crash from accessing GlobalVars during map load)
         _state.MapStartTime = 0;

@@ -87,18 +87,29 @@ public class ChangeMapManager
         {
             try
             {
-                if (_core.Engine is not { } engine) return;
+                if (_core.Engine is not { } engine)
+                {
+                    // Leaving the latch set here would block every future map change.
+                    _core.Logger.LogWarning(
+                        "MapChooser: scheduled ChangeMap for '{Map}' fired but Engine is null; releasing MapSwitchInFlight.",
+                        map.Name);
+                    _state.MapSwitchInFlight = false;
+                    return;
+                }
 
+                // `nextlevel` is a CS2 ConVar that triggers its own changelevel at round end, so it
+                // must receive the canonical map id — a display name there hijacks the real switch.
                 if (!string.IsNullOrEmpty(map.Id) && (map.Id.StartsWith("ws:") || long.TryParse(map.Id, out _)))
                 {
                     string workshopId = map.Id.StartsWith("ws:") ? map.Id.Substring(3) : map.Id;
-                    engine.ExecuteCommand($"nextlevel {map.Name}");
+                    engine.ExecuteCommand($"nextlevel {workshopId}");
                     engine.ExecuteCommand($"host_workshop_map {workshopId}");
                 }
                 else
                 {
-                    engine.ExecuteCommand($"nextlevel {map.Name}");
-                    engine.ExecuteCommand($"changelevel {map.Id ?? map.Name}");
+                    string targetId = map.Id ?? map.Name;
+                    engine.ExecuteCommand($"nextlevel {targetId}");
+                    engine.ExecuteCommand($"changelevel {targetId}");
                 }
             }
             catch (Exception ex)
