@@ -92,13 +92,13 @@ public class ChangeMapManager
                 if (!string.IsNullOrEmpty(map.Id) && (map.Id.StartsWith("ws:") || long.TryParse(map.Id, out _)))
                 {
                     string workshopId = map.Id.StartsWith("ws:") ? map.Id.Substring(3) : map.Id;
-                    engine.ExecuteCommandWithBuffer($"nextlevel {map.Name}", _ => { });
-                    engine.ExecuteCommandWithBuffer($"host_workshop_map {workshopId}", _ => { });
+                    engine.ExecuteCommand($"nextlevel {map.Name}");
+                    engine.ExecuteCommand($"host_workshop_map {workshopId}");
                 }
                 else
                 {
-                    engine.ExecuteCommandWithBuffer($"nextlevel {map.Name}", _ => { });
-                    engine.ExecuteCommandWithBuffer($"changelevel {map.Id ?? map.Name}", _ => { });
+                    engine.ExecuteCommand($"nextlevel {map.Name}");
+                    engine.ExecuteCommand($"changelevel {map.Id ?? map.Name}");
                 }
             }
             catch (Exception ex)
